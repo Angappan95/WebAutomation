@@ -15,23 +15,24 @@ class CreateAccount(unittest.TestCase):
         cls.driver.set_page_load_timeout(5)
         cls.driver.implicitly_wait(10)
 
-        cls.email = f'xyz123@mail{random.randint(1, 1000)}.com'
-        cls.fname = 'abx'
-        cls.lname = 'gdfg'
-        cls.alias = 'john'
-        cls.address = "1 xyz street"
-        cls.city = "Alexander City"
-        cls.zip_code = 35010
-        cls.pwd = '12345678'
-        cls.phone = 567891234
-
     def test_signup(self):
+
         self.driver.find_element_by_partial_link_text('Sign in').click()
         assert self.driver.title == 'Login - My Store', "Title not matching"
         driver = self.driver
-        signup = HomePage(driver)
-        signup.click_signin_btn()
-        signup.create_account(self.email)
+        self.email = f'xyz123@mail{random.randint(1, 1000)}.com'
+        self.fname = 'Jack'
+        self.lname = 'Matt'
+        self.alias = 'john'
+        self.address = "1 xyz street"
+        self.city = "Alexander City"
+        self.zip_code = 35010
+        self.pwd = '12345678'
+        self.phone = 567891234
+
+        signuppage = HomePage(driver)
+        signuppage.click_signin_btn()
+        signuppage.create_account(self.email)
 
         create_acc = CreateAccountPage(self.driver)
         create_acc.fill_personal_info(self.fname, self.lname, self.email, self.pwd)
@@ -42,7 +43,15 @@ class CreateAccount(unittest.TestCase):
         create_acc.validate_signout_option()
 
     def test_order(self):
-        pass
+        self.email = 'abc@xyxacz.com'
+        self.pwd = '12345678'
+        driver = self.driver
+        loginpage = HomePage(driver)
+        loginpage.click_signin_btn()
+        loginpage.login_valid(self.email, self.pwd)
+        accountpage = AccountsPage(driver)
+        accountpage.add_to_cart()
+        accountpage.order()
 
     @classmethod
     def tearDownClass(cls):

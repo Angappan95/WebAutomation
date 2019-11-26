@@ -2,7 +2,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 
 
@@ -13,7 +13,8 @@ class HomePage:
         self.ele_create_enter_mail_id = 'email_create'
         self.btn_create_account_xpath = '//i[@class="icon-user left"]'
         self.ele_registered_mail_id = 'email'
-        self.ele_registered_password = 'passwd'
+        self.ele_registered_password_id = 'passwd'
+        self.ele_registered_signin_id = 'SubmitLogin'
 
     def click_signin_btn(self):
         self.driver.find_element_by_partial_link_text(self.ele_signin_id).click()
@@ -24,7 +25,9 @@ class HomePage:
 
     def login_valid(self, mail, password):
         self.driver.find_element_by_id(self.ele_registered_mail_id).send_keys(mail)
-        self.driver.find_element_by_id(self.ele_registered_password).send_keys(password)
+        self.driver.find_element_by_id(self.ele_registered_password_id).send_keys(password)
+        self.driver.find_element_by_id(self.ele_registered_signin_id).click()
+        assert self.driver.title == 'My account - My Store', f'Something went wrong. Site is in {self.driver.title} page'
 
 
 class CreateAccountPage:
@@ -102,5 +105,55 @@ class CreateAccountPage:
             assert False, "Sign out option is not displayed"
 
 
-class x:
-    pass
+class AccountsPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.ele_women_section_link = 'Women'
+        self.ele_product_xpath = '//div[h5[a[contains(text(),"Faded Short Sleeve T-shirts")]]]'
+        self.btn_add_to_cart_link = 'Add to cart'
+        self.ele_confirmation_msg_xpath = '//h2[contains(.,"Product successfully added to your shopping cart")]'
+        self.btn_checkout_xpath = '//span[contains(text(),"Proceed to checkout")]'
+        self.ele_summary_checkout_xpath = '(//span[contains(text(),"Proceed to checkout")])[2]'
+        self.ele_address_checkout_xpath = '(//span[contains(text(),"Proceed to checkout")])[2]'
+        self.ele_terms_xpath = '(//span[contains(text(),"Proceed to checkout")])[2]'
+        self.ele_wire_pay_xpath = '//a[contains(text(),"Pay by bank wire")]'
+        self.ele_confirm_order_xpath = '//span[text()="I confirm my order"]'
+        self.title_order_confirmation = 'Order confirmation - My Store'
+
+    def add_to_cart(self):
+        self.driver.find_element_by_partial_link_text(self.ele_women_section_link).click()
+        ele_product = self.driver.find_element_by_xpath(self.ele_product_xpath)
+        ActionChains(self.driver).move_to_element(ele_product).perform()
+
+        # Click on Add to Cart button
+        ele_product.find_element_by_link_text(self.btn_add_to_cart_link).click()
+
+        try:
+            self.driver.find_element_by_xpath(self.ele_confirmation_msg_xpath)
+
+        except NoSuchElementException:
+            assert False, 'Product confirmation message not displayed'
+
+        # Click on Proceed to Checkout option
+        ele_checkout = self.driver.find_element_by_xpath(self.btn_checkout_xpath)
+
+        # Click on checkout button in Confirmation page
+        ele_checkout.click()
+
+        # Click on checkout button in Summary page
+        WebDriverWait(self.driver, 5).until(
+            ec.presence_of_element_located((By.XPATH, self.ele_summary_checkout_xpath))).click()
+
+        # Click on checkout button in Address page
+        WebDriverWait(self.driver, 5).until(
+            ec.presence_of_element_located((By.XPATH, self.ele_address_checkout_xpath))).click()
+
+    def order(self):
+        self.driver.find_element_by_id('cgv').click()
+        WebDriverWait(self.driver, 5).until(ec.presence_of_element_located((By.XPATH, self.ele_terms_xpath))).click()
+
+        self.driver.find_element_by_xpath(self.ele_wire_pay_xpath).click()
+
+        self.driver.find_element_by_xpath(self.ele_confirm_order_xpath).click()
+
+        assert self.driver.title == self.title_order_confirmation, 'Confirmation page is not loaded'
