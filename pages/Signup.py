@@ -156,4 +156,5 @@ class AccountsPage:
 
         self.driver.find_element_by_xpath(self.ele_confirm_order_xpath).click()
 
+    def validate_order_confirmation(self):
         assert self.driver.title == self.title_order_confirmation, 'Confirmation page is not loaded'

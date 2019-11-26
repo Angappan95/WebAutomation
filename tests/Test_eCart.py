@@ -16,7 +16,6 @@ class CreateAccount(unittest.TestCase):
         cls.driver.implicitly_wait(10)
 
     def test_signup(self):
-
         self.driver.find_element_by_partial_link_text('Sign in').click()
         assert self.driver.title == 'Login - My Store', "Title not matching"
         driver = self.driver
@@ -52,6 +51,7 @@ class CreateAccount(unittest.TestCase):
         accountpage = AccountsPage(driver)
         accountpage.add_to_cart()
         accountpage.order()
+        accountpage.validate_order_confirmation()
 
     @classmethod
     def tearDownClass(cls):
